@@ -225,7 +225,7 @@ rNPyey0RDby3q++gYuWGT9+8LrIZxN3jwthOe1KhTlIE4srO8b3kMwAA//+dn1cZ7AAAAA==
 		name:    "function.tmpl",
 		local:   "minimock/function.tmpl",
 		size:    2696,
-		modtime: 1708028694,
+		modtime: 1708032204,
 		compressed: `
 H4sIAAAAAAAC/6RWwW7cNhA9S18xFZJAKmQeenThQ1s4xR5qBHbQHIKiULSjrWCJ2pIjGwEx/15wKK2o
 9a5tuL6sRc68IR/nPdK5LTatRsgqa9FQO+gMLpjTtoEfiNRjpenamJxKQGNS5y6gbWAwkOuBQN2N3wgt
@@ -239,9 +239,9 @@ v55C5yT1zfQ9x1yM/Uz2mrBnNnmLduzIzsTMel0RdpzuGbgVV7LXxgxTp07mCbMR+ZlfZpv9OOp6jcQi
 Dy7ThNOkGQyIaeWDWQxr0s3G3lT3uC0KWVakRC+kWXx/T1LyvhM0G0QYthrgXLT+uYasPaQQpWu9zW6w
 Kugj/e/Pzs00Jwmp21HnZxdHpKbPsERpimMHSjxMZEAxW1P71dT58od2usHHpZty8qZ13kkmLzq4yDR6
 rBThzsf545fgyjB/ONwVYfzPqhuR5QzPOJBMnNdMEs2r4MmX4co4uEJeU1eUa6BZFofBZxGOk+fjOvKA
-JEkWJ10bysx+vMUjX1h6amO/mJYOfCexVi+v4MO374RW/To2DRr3iorL1WeCSjN414gIlpm66rowPCWd
-UudTE1kAopeQoJxa1Dm/OLXz0zfPUi+8V6SWf2etXgllbG/qTq7IvFg9D+wu5BYLfcH0/2/d6d3yUrGn
-Z/XUU4AZuID4MZdwKo+fkPJfAAAA//+GVRbdiAoAAA==
+JEkWJ10bysx+vMUjX1h6amO/mJYOfCexVi+v4MO374RW/To2DRr3iorL1WeCSjN414gIlpm66rowHN0W
+x+p8aiILQPQSilFWizrnF6d2fvrmWeqF94rU8u+s1SuhjO1N3ckVmRer54HdhdxioS+Y/v+tO71bXir2
+9KyeegowAxcQP+YSTuXxE1L+CwAA//9wBrhTiAoAAA==
 `,
 	},
 

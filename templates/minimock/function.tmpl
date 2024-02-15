@@ -84,8 +84,7 @@ func {{.TestName}}(t *testing.T) {
 			{{- end}}
 
 			{{template "results" $f}} {{template "call" $f}}
-
-			{{ if .ReturnsError}}
+			{{- if .ReturnsError}}
                 {{template "assertion" $f}}
 			{{- end}}
 			{{- range .TestResults}}
