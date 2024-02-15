@@ -122,15 +122,12 @@ func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]typ
 	ul := make(map[string]types.Type)
 	el := make(map[*types.Struct]ast.Expr)
 	for e, t := range ti.Types {
+		typeName := t.Type.String()
+		if _, ok := t.Type.Underlying().(*types.Interface); ok {
+			typeName = correctInterfaceName(typeName)
+		}
 		// Collect the underlying types.
-		ul[t.Type.String()] = t.Type.Underlying()
-
-		//if v, ok := t.Type.(*types.Interface); ok {
-		//	log.Println(v.String())
-		//}
-		//if v, ok := t.Type.Underlying().(*types.Interface); ok {
-		//log.Println(v.String())
-		//}
+		ul[typeName] = t.Type.Underlying()
 
 		// Collect structs to determine the fields of a receiver.
 		if v, ok := t.Type.(*types.Struct); ok {
@@ -138,6 +135,13 @@ func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]typ
 		}
 	}
 	return ul, el
+}
+
+func correctInterfaceName(name string) string {
+	if lastIdx := strings.LastIndexByte(name, '/'); lastIdx >= 0 {
+		return name[lastIdx+1:]
+	}
+	return name
 }
 
 func parsePkgComment(f *ast.File, pkgPos token.Pos) []string {

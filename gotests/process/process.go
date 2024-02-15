@@ -18,7 +18,6 @@ const newFilePerm os.FileMode = 0644
 
 const (
 	specifyFlagMessage = "Please specify either the -only, -excl, -exported, or -all flag"
-	specifyFileMessage = "Please specify a file or directory containing the source"
 )
 
 // Set of options to use when generating tests.
@@ -50,9 +49,11 @@ func Run(out io.Writer, args []string, opts *Options) {
 		return
 	}
 	if len(args) == 0 {
-		fmt.Fprintln(out, specifyFileMessage)
-		return
+		// if there are no args it means that tests
+		// have to be generated for current directory
+		args = []string{"."}
 	}
+
 	for _, path := range args {
 		generateTests(out, path, opts.WriteOutput, opt)
 	}

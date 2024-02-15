@@ -29,11 +29,6 @@ func TestRun(t *testing.T) {
 			opts: &Options{},
 			want: specifyFlagMessage + "\n",
 		}, {
-			name: "Non-empty options with no args",
-			args: []string{},
-			opts: &Options{AllFuncs: true},
-			want: specifyFileMessage + "\n",
-		}, {
 			name: "OnlyFuncs option w/ no matches",
 			args: []string{"testdata/foobar.go"},
 			opts: &Options{OnlyFuncs: "FooBar"},

@@ -6,12 +6,11 @@ import (
 )
 
 type Expression struct {
-	Value       string
-	IsStar      bool
-	IsVariadic  bool
-	IsWriter    bool
-	IsInterface bool
-	Underlying  string
+	Value      string
+	IsStar     bool
+	IsVariadic bool
+	IsWriter   bool
+	Underlying string
 }
 
 func (e *Expression) String() string {
