@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/cweill/gotests/internal/models"
@@ -43,7 +42,7 @@ func (o *Options) Process(head *models.Header, funcs []*models.Function) ([]byte
 	}
 
 	//
-	tf, err := ioutil.TempFile("", "gotests_")
+	tf, err := os.CreateTemp("", "gotests_")
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.TempFile: %v", err)
 	}
@@ -77,10 +76,12 @@ func (o *Options) providesTemplate() bool {
 }
 
 func (o *Options) writeTests(w io.Writer, head *models.Header, funcs []*models.Function) error {
-	if path, ok := importsMap[o.Template]; ok {
-		head.Imports = append(head.Imports, &models.Import{
-			Path: fmt.Sprintf(`"%s"`, path),
-		})
+	if paths, ok := importsMap[o.Template]; ok {
+		for _, path := range paths {
+			head.Imports = append(head.Imports, &models.Import{
+				Path: fmt.Sprintf(`"%s"`, path),
+			})
+		}
 	}
 
 	b := bufio.NewWriter(w)

@@ -6,11 +6,12 @@ import (
 )
 
 type Expression struct {
-	Value      string
-	IsStar     bool
-	IsVariadic bool
-	IsWriter   bool
-	Underlying string
+	Value       string
+	IsStar      bool
+	IsVariadic  bool
+	IsWriter    bool
+	IsInterface bool
+	Underlying  string
 }
 
 func (e *Expression) String() string {
@@ -36,6 +37,10 @@ func (f *Field) IsWriter() bool {
 
 func (f *Field) IsStruct() bool {
 	return strings.HasPrefix(f.Type.Underlying, "struct")
+}
+
+func (f *Field) IsInterface() bool {
+	return strings.HasPrefix(f.Type.Underlying, "interface")
 }
 
 func (f *Field) IsBasicType() bool {

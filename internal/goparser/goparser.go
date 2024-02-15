@@ -124,6 +124,14 @@ func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]typ
 	for e, t := range ti.Types {
 		// Collect the underlying types.
 		ul[t.Type.String()] = t.Type.Underlying()
+
+		//if v, ok := t.Type.(*types.Interface); ok {
+		//	log.Println(v.String())
+		//}
+		//if v, ok := t.Type.Underlying().(*types.Interface); ok {
+		//log.Println(v.String())
+		//}
+
 		// Collect structs to determine the fields of a receiver.
 		if v, ok := t.Type.(*types.Struct); ok {
 			el[v] = e

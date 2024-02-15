@@ -1,0 +1,102 @@
+{{define "assertion" -}}
+if !tt.wantErr(t, err
+{{- if or (not .Subtests) .PrintInputs -}}
+    , fmt.Sprintf("{{template "message" .}}", {{template "inputs" .}})
+{{- end -}}
+) {
+    return
+}
+{{- end}}
+
+
+{{define "equal"}}assert.Equal{{if or (not .Subtests) .PrintInputs}}f{{end}}{{end}}
+
+{{define "msg2"}}{{Got .}} = %v, want %v", {{template "inputs" .}} {{Got .}}, tt.{{Want .}}{{end}}
+
+{{define "msg"}} , "{{template "message" .}}", {{template "inputs" .}}{{end}}
+
+
+{{define "function"}}
+{{- $f := .}}
+
+func {{.TestName}}(t *testing.T) {
+    t.Parallel()
+
+	tests := {{ if .Named}}map[string]struct{{else}}[]struct{{end}} {
+		{{ if (not .Named)}}name string{{end}}
+		{{- with .Receiver}}
+			{{- if and .IsStruct .Fields}}
+				{{- range .Fields}}
+                    {{- if .IsInterface}}
+                	   {{Field .}} func(minimock.MockController) {{.Type}}
+                	{{- else }}
+                	   {{Field .}} {{.Type}}
+                	{{- end }}
+                {{- end}}
+			{{- else}}
+				{{Receiver .}} {{.Type}}
+			{{- end}}
+		{{- end}}
+		{{- range .TestParameters}}
+		    {{- if .IsInterface}}
+                {{Param .}} func(minimock.MockController) {{.Type}}
+            {{- else }}
+                {{Param .}} {{.Type}}
+            {{- end }}
+        {{- end}}
+		{{- range .TestResults}}
+			{{Want .}} {{.Type}}
+		{{- end}}
+		{{- if .ReturnsError}}
+			wantErr assert.ErrorAssertionFunc
+		{{- end}}
+	}{
+		{},
+	}
+	for {{if (or .Subtests (not .IsNaked))}} {{if .Named}}name{{else}}_{{end}}, tt := {{end}} range tests {
+		{{- if .Subtests}}
+		tt := tt
+		{{- if and .Parallel .Named}}name := name;{{ end }}
+		t.Run({{if .Named}}name{{else}}tt.name{{end}}, func(t *testing.T) {
+			t.Parallel()
+		{{- end}}
+
+		    ctl := minimock.NewController(t)
+
+			{{- with .Receiver}}
+				{{ if .IsStruct}}
+					{{Receiver .}} := {{if .Type.IsStar}}&{{end}}{{.Type.Value}}{
+					{{- range .Fields}}
+					    {{- if .IsInterface}}
+						    {{.Name}}: tt.{{Field .}}(ctl),
+					    {{- else }}
+					        {{.Name}}: tt.{{Field .}},
+					    {{- end }}
+					{{- end}}
+					}
+				{{- end}}
+			{{- end}}
+
+			{{- range .Parameters}}
+				{{- if .IsWriter}}
+					{{Param .}} := &bytes.Buffer{}
+				{{- end}}
+			{{- end}}
+
+			{{template "results" $f}} {{template "call" $f}}
+
+			{{ if .ReturnsError}}
+                {{template "assertion" $f}}
+			{{- end}}
+			{{- range .TestResults}}
+				{{- if .IsWriter}}
+                    {{template "equal" $f}}(t, tt.{{Want .}}, {{Param .}}.String(){{template "msg" $f}})
+				{{- else}}
+                    {{template "equal" $f}}(t, tt.{{Want .}}, {{Got .}}{{template "msg" $f}})
+				{{- end}}
+			{{- end}}
+		{{- if .Subtests }} }) {{- end -}}
+	}
+}
+
+{{end}}
