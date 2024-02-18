@@ -10,8 +10,10 @@ import (
 	"go/token"
 	"go/types"
 	"io/ioutil"
+	"path"
 	"strings"
 
+	"github.com/cweill/gotests/internal/interfaces"
 	"github.com/cweill/gotests/internal/models"
 )
 
@@ -55,7 +57,7 @@ func (p *Parser) Parse(srcPath string, files []models.Path) (*Result, error) {
 			Imports:  parseImports(f.Imports),
 			Code:     goCode(b, f),
 		},
-		Funcs: p.parseFunctions(fset, f, fs),
+		Funcs: p.parseFunctions(srcPath, fset, f, fs),
 	}, nil
 }
 
@@ -94,8 +96,13 @@ func (p *Parser) parseFiles(fset *token.FileSet, f *ast.File, files []models.Pat
 	return fs, nil
 }
 
-func (p *Parser) parseFunctions(fset *token.FileSet, f *ast.File, fs []*ast.File) []*models.Function {
+func (p *Parser) parseFunctions(srcPath string, fset *token.FileSet, f *ast.File, fs []*ast.File) []*models.Function {
 	ul, el := p.parseTypes(fset, fs)
+	interfaceCollector := interfaces.NewCollector(path.Dir(srcPath))
+	_, err := interfaceCollector.Collect(f, fs)
+	if err != nil {
+		panic(err)
+	}
 	var funcs []*models.Function
 	for _, d := range f.Decls {
 		fDecl, ok := d.(*ast.FuncDecl)
@@ -118,7 +125,8 @@ func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]typ
 		Types: make(map[ast.Expr]types.TypeAndValue),
 	}
 	// Note: conf.Check can fail, but since Info is not required data, it's ok.
-	conf.Check("", fset, fs, ti)
+	_, _ = conf.Check("", fset, fs, ti)
+
 	ul := make(map[string]types.Type)
 	el := make(map[*types.Struct]ast.Expr)
 	for e, t := range ti.Types {

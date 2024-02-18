@@ -212,12 +212,13 @@ var _escData = map[string]*_escFile{
 	"/minimock/call.tmpl": {
 		name:    "call.tmpl",
 		local:   "minimock/call.tmpl",
-		size:    236,
-		modtime: 1707347174,
+		size:    267,
+		modtime: 1708127586,
 		compressed: `
-H4sIAAAAAAAC/0yO0YrCQAxFfyWUPuxCyQcs7Af0ZVlU9DlMUw20o6RRkZB/lynV+nThzrlz4t5xL5mh
-SjQMVYT7XewEuOHEcmMtjfSQzwbYTlvTa7IIM3Tn3JXXFwkYsbb4RyNHfLkr5SNDLQ3UPMDPL+A/KY1s
-rNPyey0RDby3q++gYuWGT9+8LrIZxN3jwthOe1KhTlIE4srO8b3kMwAA//+dn1cZ7AAAAA==
+H4sIAAAAAAAC/0yO0UrGMAyFXyWMXSiMPIDgA/RGREWvQ5dpoKuSRkVC3l06/v3bVeH0nO+L+8yLVIYh
+UylDhPuv2AfgE2eWH9aeyAL10wBTezb9zhZhhu5c5/67NwEjjhQfaOWIG3el+s4wygQjF7i7B3wkpZWN
+tV3oo0RMcN0evjcV6zecfdu6y7YippaqsS6Uuy5buT1z8OXvizG1V1KhWXIE4oHanr3/HwAA//+rVFym
+CwEAAA==
 `,
 	},
 
