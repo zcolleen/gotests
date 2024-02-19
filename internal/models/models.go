@@ -3,6 +3,8 @@ package models
 import (
 	"strings"
 	"unicode"
+
+	"github.com/cweill/gotests/internal/interfaces"
 )
 
 type Expression struct {
@@ -10,6 +12,7 @@ type Expression struct {
 	IsStar     bool
 	IsVariadic bool
 	IsWriter   bool
+	Interface  *interfaces.Interface
 	Underlying string
 }
 
@@ -39,7 +42,16 @@ func (f *Field) IsStruct() bool {
 }
 
 func (f *Field) IsInterface() bool {
-	return strings.HasPrefix(f.Type.Underlying, "interface")
+	iface := f.Type.Interface
+	if iface == nil {
+		return false
+	}
+	// context is a special case, we dont want to mock it
+	if iface.ImportPath == "context" && iface.Name == "Context" {
+		return false
+	}
+
+	return true
 }
 
 func (f *Field) IsBasicType() bool {

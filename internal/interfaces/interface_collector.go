@@ -131,7 +131,10 @@ func (c *Collector) collectFromImports(f *ast.File) (map[Token]Interface, error)
 func (c *Collector) collectFromImport(imp *ast.ImportSpec) (map[Token]Interface, error) {
 	path := strings.Trim(imp.Path.Value, "\"")
 	pkg, err := c.loadPackage(path)
-	if err != nil {
+	// we dont want to check error here
+	// because even if there is any error
+	// package might be filled
+	if pkg == nil {
 		return nil, fmt.Errorf("cant load package: %w", err)
 	}
 

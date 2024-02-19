@@ -50,6 +50,10 @@ func (p *Parser) Parse(srcPath string, files []models.Path) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
+	funcs, err := p.parseFunctions(srcPath, fset, f, fs)
+	if err != nil {
+		return nil, err
+	}
 	return &Result{
 		Header: &models.Header{
 			Comments: parsePkgComment(f, f.Package),
@@ -57,7 +61,7 @@ func (p *Parser) Parse(srcPath string, files []models.Path) (*Result, error) {
 			Imports:  parseImports(f.Imports),
 			Code:     goCode(b, f),
 		},
-		Funcs: p.parseFunctions(srcPath, fset, f, fs),
+		Funcs: funcs,
 	}, nil
 }
 
@@ -96,12 +100,12 @@ func (p *Parser) parseFiles(fset *token.FileSet, f *ast.File, files []models.Pat
 	return fs, nil
 }
 
-func (p *Parser) parseFunctions(srcPath string, fset *token.FileSet, f *ast.File, fs []*ast.File) []*models.Function {
+func (p *Parser) parseFunctions(srcPath string, fset *token.FileSet, f *ast.File, fs []*ast.File) ([]*models.Function, error) {
 	ul, el := p.parseTypes(fset, fs)
 	interfaceCollector := interfaces.NewCollector(path.Dir(srcPath))
-	_, err := interfaceCollector.Collect(f, fs)
+	ifacesMap, err := interfaceCollector.Collect(f, fs)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var funcs []*models.Function
 	for _, d := range f.Decls {
@@ -109,9 +113,9 @@ func (p *Parser) parseFunctions(srcPath string, fset *token.FileSet, f *ast.File
 		if !ok {
 			continue
 		}
-		funcs = append(funcs, parseFunc(fDecl, ul, el))
+		funcs = append(funcs, parseFunc(fDecl, ul, el, ifacesMap))
 	}
-	return funcs
+	return funcs, nil
 }
 
 func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]types.Type, map[*types.Struct]ast.Expr) {
@@ -130,13 +134,8 @@ func (p *Parser) parseTypes(fset *token.FileSet, fs []*ast.File) (map[string]typ
 	ul := make(map[string]types.Type)
 	el := make(map[*types.Struct]ast.Expr)
 	for e, t := range ti.Types {
-		typeName := t.Type.String()
-		if _, ok := t.Type.Underlying().(*types.Interface); ok {
-			typeName = correctInterfaceName(typeName)
-		}
 		// Collect the underlying types.
-		ul[typeName] = t.Type.Underlying()
-
+		ul[t.Type.String()] = t.Type.Underlying()
 		// Collect structs to determine the fields of a receiver.
 		if v, ok := t.Type.(*types.Struct); ok {
 			el[v] = e
@@ -197,14 +196,14 @@ func goCode(b []byte, f *ast.File) []byte {
 	return b[furthestPos:]
 }
 
-func parseFunc(fDecl *ast.FuncDecl, ul map[string]types.Type, el map[*types.Struct]ast.Expr) *models.Function {
+func parseFunc(fDecl *ast.FuncDecl, ul map[string]types.Type, el map[*types.Struct]ast.Expr, ifaces map[interfaces.Token]interfaces.Interface) *models.Function {
 	f := &models.Function{
 		Name:       fDecl.Name.String(),
 		IsExported: fDecl.Name.IsExported(),
-		Receiver:   parseReceiver(fDecl.Recv, ul, el),
-		Parameters: parseFieldList(fDecl.Type.Params, ul),
+		Receiver:   parseReceiver(fDecl.Recv, ul, el, ifaces),
+		Parameters: parseFieldList(fDecl.Type.Params, ul, ifaces),
 	}
-	fs := parseFieldList(fDecl.Type.Results, ul)
+	fs := parseFieldList(fDecl.Type.Results, ul, ifaces)
 	i := 0
 	for _, fi := range fs {
 		if fi.Type.String() == "error" {
@@ -233,12 +232,12 @@ func parseImports(imps []*ast.ImportSpec) []*models.Import {
 	return is
 }
 
-func parseReceiver(fl *ast.FieldList, ul map[string]types.Type, el map[*types.Struct]ast.Expr) *models.Receiver {
+func parseReceiver(fl *ast.FieldList, ul map[string]types.Type, el map[*types.Struct]ast.Expr, ifaces map[interfaces.Token]interfaces.Interface) *models.Receiver {
 	if fl == nil {
 		return nil
 	}
 	r := &models.Receiver{
-		Field: parseFieldList(fl, ul)[0],
+		Field: parseFieldList(fl, ul, ifaces)[0],
 	}
 	t, ok := ul[r.Type.Value]
 	if !ok {
@@ -252,7 +251,7 @@ func parseReceiver(fl *ast.FieldList, ul map[string]types.Type, el map[*types.St
 	if !found {
 		return r
 	}
-	r.Fields = append(r.Fields, parseFieldList(st.(*ast.StructType).Fields, ul)...)
+	r.Fields = append(r.Fields, parseFieldList(st.(*ast.StructType).Fields, ul, ifaces)...)
 	for i, f := range r.Fields {
 		// https://github.com/cweill/gotests/issues/69
 		if i >= s.NumFields() {
@@ -264,14 +263,14 @@ func parseReceiver(fl *ast.FieldList, ul map[string]types.Type, el map[*types.St
 
 }
 
-func parseFieldList(fl *ast.FieldList, ul map[string]types.Type) []*models.Field {
+func parseFieldList(fl *ast.FieldList, ul map[string]types.Type, ifaces map[interfaces.Token]interfaces.Interface) []*models.Field {
 	if fl == nil {
 		return nil
 	}
 	i := 0
 	var fs []*models.Field
 	for _, f := range fl.List {
-		for _, pf := range parseFields(f, ul) {
+		for _, pf := range parseFields(f, ul, ifaces) {
 			pf.Index = i
 			fs = append(fs, pf)
 			i++
@@ -280,8 +279,8 @@ func parseFieldList(fl *ast.FieldList, ul map[string]types.Type) []*models.Field
 	return fs
 }
 
-func parseFields(f *ast.Field, ul map[string]types.Type) []*models.Field {
-	t := parseExpr(f.Type, ul)
+func parseFields(f *ast.Field, ul map[string]types.Type, ifaces map[interfaces.Token]interfaces.Interface) []*models.Field {
+	t := parseExpr(f.Type, ul, ifaces)
 	if len(f.Names) == 0 {
 		return []*models.Field{{
 			Type: t,
@@ -297,7 +296,7 @@ func parseFields(f *ast.Field, ul map[string]types.Type) []*models.Field {
 	return fs
 }
 
-func parseExpr(e ast.Expr, ul map[string]types.Type) *models.Expression {
+func parseExpr(e ast.Expr, ul map[string]types.Type, ifaces map[interfaces.Token]interfaces.Interface) *models.Expression {
 	switch v := e.(type) {
 	case *ast.StarExpr:
 		val := types.ExprString(v.X)
@@ -307,7 +306,7 @@ func parseExpr(e ast.Expr, ul map[string]types.Type) *models.Expression {
 			Underlying: underlying(val, ul),
 		}
 	case *ast.Ellipsis:
-		exp := parseExpr(v.Elt, ul)
+		exp := parseExpr(v.Elt, ul, ifaces)
 		return &models.Expression{
 			Value:      exp.Value,
 			IsStar:     exp.IsStar,
@@ -316,10 +315,16 @@ func parseExpr(e ast.Expr, ul map[string]types.Type) *models.Expression {
 		}
 	default:
 		val := types.ExprString(e)
+		var ifacePtr *interfaces.Interface
+		iface, ok := ifaces[interfaces.Token(val)]
+		if ok {
+			ifacePtr = &iface
+		}
 		return &models.Expression{
 			Value:      val,
 			Underlying: underlying(val, ul),
 			IsWriter:   val == "io.Writer",
+			Interface:  ifacePtr,
 		}
 	}
 }
