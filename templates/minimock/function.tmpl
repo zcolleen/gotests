@@ -11,7 +11,7 @@ if !tt.wantErr(t, err
 
 {{define "equal"}}assert.Equal{{if or (not .Subtests) .PrintInputs}}f{{end}}{{end}}
 
-{{define "msg2"}}{{Got .}} = %v, want %v", {{template "inputs" .}} {{Got .}}, tt.{{Want .}}{{end}}
+{{define "msg2"}} , = %v, want %v", {{template "inputs" .}} {{Got .}}, tt.{{Want .}}{{end}}
 
 {{define "msg"}} , "{{template "message" .}}", {{template "inputs" .}}{{end}}
 
@@ -20,15 +20,19 @@ if !tt.wantErr(t, err
 {{- $f := .}}
 
 func {{.TestName}}(t *testing.T) {
+    {{- if .Parallel }}
     t.Parallel()
+    {{- end }}
 
+    {{- $isInterfaceFound := false }}
 	tests := {{ if .Named}}map[string]struct{{else}}[]struct{{end}} {
 		{{ if (not .Named)}}name string{{end}}
 		{{- with .Receiver}}
 			{{- if and .IsStruct .Fields}}
 				{{- range .Fields}}
                     {{- if .IsInterface}}
-                	   {{Field .}} func(minimock.MockController) {{.Type}}
+                        {{- $isInterfaceFound = true }}
+                	    {{Field .}} func(minimock.MockController) {{.Type}}
                 	{{- else }}
                 	   {{Field .}} {{.Type}}
                 	{{- end }}
@@ -39,7 +43,10 @@ func {{.TestName}}(t *testing.T) {
 		{{- end}}
 		{{- range .TestParameters}}
 		    {{- if .IsInterface}}
-                {{Param .}} func(minimock.MockController) {{.Type}}
+		        {{- if or (ne .Type.Interface.ImportPath "context") (ne .Type.Interface.Name "Context") }}
+		            {{- $isInterfaceFound = true }}
+                    {{Param .}} func(minimock.MockController) {{.Type}}
+                {{- end }}
             {{- else }}
                 {{Param .}} {{.Type}}
             {{- end }}
@@ -61,7 +68,9 @@ func {{.TestName}}(t *testing.T) {
 			t.Parallel()
 		{{- end}}
 
+            {{- if $isInterfaceFound }}
 		    ctl := minimock.NewController(t)
+            {{- end }}
 
 			{{- with .Receiver}}
 				{{ if .IsStruct}}
@@ -77,22 +86,12 @@ func {{.TestName}}(t *testing.T) {
 				{{- end}}
 			{{- end}}
 
-			{{- range .Parameters}}
-				{{- if .IsWriter}}
-					{{Param .}} := &bytes.Buffer{}
-				{{- end}}
-			{{- end}}
-
 			{{template "results" $f}} {{template "call" $f}}
 			{{- if .ReturnsError}}
                 {{template "assertion" $f}}
 			{{- end}}
 			{{- range .TestResults}}
-				{{- if .IsWriter}}
-                    {{template "equal" $f}}(t, tt.{{Want .}}, {{Param .}}.String(){{template "msg" $f}})
-				{{- else}}
-                    {{template "equal" $f}}(t, tt.{{Want .}}, {{Got .}}{{template "msg" $f}})
-				{{- end}}
+                {{template "equal" $f}}(t, tt.{{Want .}}, {{Got .}}, "%q. {{with $f.Receiver}}{{$f.Receiver.Type.Value}}.{{end}}{{$f.Name}}() {{Got .}} = %v, want %v")
 			{{- end}}
 		{{- if .Subtests }} }) {{- end -}}
 	}

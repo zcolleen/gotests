@@ -42,16 +42,7 @@ func (f *Field) IsStruct() bool {
 }
 
 func (f *Field) IsInterface() bool {
-	iface := f.Type.Interface
-	if iface == nil {
-		return false
-	}
-	// context is a special case, we dont want to mock it
-	if iface.ImportPath == "context" && iface.Name == "Context" {
-		return false
-	}
-
-	return true
+	return f.Type.Interface != nil
 }
 
 func (f *Field) IsBasicType() bool {
@@ -94,32 +85,13 @@ type Function struct {
 func (f *Function) TestParameters() []*Field {
 	var ps []*Field
 	for _, p := range f.Parameters {
-		if p.IsWriter() {
-			continue
-		}
 		ps = append(ps, p)
 	}
 	return ps
 }
 
 func (f *Function) TestResults() []*Field {
-	var ps []*Field
-	ps = append(ps, f.Results...)
-	for _, p := range f.Parameters {
-		if !p.IsWriter() {
-			continue
-		}
-		ps = append(ps, &Field{
-			Name: p.Name,
-			Type: &Expression{
-				Value:      "string",
-				IsWriter:   true,
-				Underlying: "string",
-			},
-			Index: len(ps),
-		})
-	}
-	return ps
+	return f.Results
 }
 
 func (f *Function) ReturnsMultiple() bool {

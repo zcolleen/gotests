@@ -212,37 +212,38 @@ var _escData = map[string]*_escFile{
 	"/minimock/call.tmpl": {
 		name:    "call.tmpl",
 		local:   "minimock/call.tmpl",
-		size:    267,
-		modtime: 1708127586,
+		size:    386,
+		modtime: 1709502194,
 		compressed: `
-H4sIAAAAAAAC/0yO0UrGMAyFXyWMXSiMPIDgA/RGREWvQ5dpoKuSRkVC3l06/v3bVeH0nO+L+8yLVIYh
-UylDhPuv2AfgE2eWH9aeyAL10wBTezb9zhZhhu5c5/67NwEjjhQfaOWIG3el+s4wygQjF7i7B3wkpZWN
-tV3oo0RMcN0evjcV6zecfdu6y7YippaqsS6Uuy5buT1z8OXvizG1V1KhWXIE4oHanr3/HwAA//+rVFym
-CwEAAA==
+H4sIAAAAAAAC/2yQz2rDMAyHX0WYHBIoeoDBLtspl1G2sbuwldbMcTpH3R+E3n24S1MGORl++ix9kmrg
+IWYG5yklZ6b6FeUI+Mye4yeXmsQB8iSA/fwi5ezFTARVOYdavZKAZrcUn2hks1a1UD4wNHEHDSe4uwfc
+U6GRhcu8dG+i2Q7Wv3Gos/osXAbyvESUA7T8Afj6c2Jcq9iPp6nInuQIzk9Z+Ftct0lWJXCPK2O28PhA
+/v1QpnMObafKaeZlx4tq3az1krrVcIv4p/83eX6jEilEb4Z4u83luTb7DQAA//+sqI8qggEAAA==
 `,
 	},
 
 	"/minimock/function.tmpl": {
 		name:    "function.tmpl",
 		local:   "minimock/function.tmpl",
-		size:    2696,
-		modtime: 1708032204,
+		size:    2867,
+		modtime: 1709507418,
 		compressed: `
-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
+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
 `,
 	},
 
@@ -272,24 +273,23 @@ H4sIAAAAAAAC/6quTklNy8xLVVDKzMvJzEtVqq1VqK4uSc0tyEksSVVQSk7MyVFS0AOLpual1NYCAgAA
 	"/minimock/inputs.tmpl": {
 		name:    "inputs.tmpl",
 		local:   "minimock/inputs.tmpl",
-		size:    177,
-		modtime: 1706989864,
+		size:    60,
+		modtime: 1709506051,
 		compressed: `
-H4sIAAAAAAAC/0yNMaoDMQxE+38KsWz58QECOUCaEMgJFCwvLqwESVsJ3T1YpHAlzWN4416pdSbYOn9O
-0y3CfW9wuUKZb2/Ab4PyPF9GarqyOw6qEWbFnbhGMA76h1/I3t7KQzrbLeUTCvJByVFwkJFoKlAOLe5J
-5/TiWc/fNwAA//94+RPrsQAAAA==
+H4sIAAAAAAAC/6quTklNy8xLVVDKzCsoLSlWqq2trs5MU8jLL1HQ80vMTU2prS0p0auuTs1Lqa3NS8xN
+1VGAcrgAAQAA//9iPKQMPAAAAA==
 `,
 	},
 
 	"/minimock/message.tmpl": {
 		name:    "message.tmpl",
 		local:   "minimock/message.tmpl",
-		size:    174,
-		modtime: 1707860836,
+		size:    113,
+		modtime: 1709506560,
 		compressed: `
-H4sIAAAAAAAC/zyM0QqCQBBF3/2KQRQKdD4g6AN6CYnofcmrDehiu6sRw/x7tERP93IOHNUeg3hQOSNG
-N6Kk1qyon0yqL0kP4gvukA3BTJWv7wV8c9MKM1aF7zM+uxlmO1UZiLsgPp38sqb4lcH5EVRJQxUmOhyJ
-OxfcjISQvQxUiVlDv1y9/bt59oVqS/l+AgAA//8oZCHjrgAAAA==
+H4sIAAAAAAAC/xzKvQrCMBQF4L1PcSgEFOx9A2c3BxH3YI8asPGnMUUO990LWT8+aeQtZaKfOM/xzh6D
+exc+BmlJ5QE78cpU+XWX7Px/0y7x+aO7Scxj42Oc6L7ZQjq8Cswde4S6wxJzQaidNKDlNQAA//+3b2zP
+cQAAAA==
 `,
 	},
 
