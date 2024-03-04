@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -35,19 +34,6 @@ func NewCollector(loadDir string) *Collector {
 	}
 }
 
-var mu sync.Mutex
-
-func printMap(m map[Token]Interface) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	for t, i := range m {
-		log.Printf("%s : Path %s Name %s DefaultName %s", t, i.ImportPath, i.Name, i.DefaultPackageName)
-	}
-	log.Println()
-	log.Println()
-}
-
 func (c *Collector) Collect(f *ast.File, fs []*ast.File) (map[Token]Interface, error) {
 	mapFromImports, err := c.collectFromImports(f)
 	if err != nil {
@@ -63,8 +49,6 @@ func (c *Collector) Collect(f *ast.File, fs []*ast.File) (map[Token]Interface, e
 	for k, v := range mapFromPackageFiles {
 		resultMap[k] = v
 	}
-
-	printMap(mapFromImports)
 
 	return resultMap, nil
 }

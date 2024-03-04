@@ -11,7 +11,6 @@ if !tt.wantErr(t, err
 
 {{define "equal"}}assert.Equal{{if or (not .Subtests) .PrintInputs}}f{{end}}{{end}}
 
-{{define "msg"}} , "{{template "message" .}}", {{template "inputs" .}}{{end}}
 
 
 {{define "function"}}
@@ -89,7 +88,7 @@ func {{.TestName}}(t *testing.T) {
                 {{template "assertion" $f}}
 			{{- end}}
 			{{- range .TestResults}}
-                {{template "equal" $f}}(t, tt.{{Want .}}, {{Got .}}, "%q. {{with $f.Receiver}}{{$f.Receiver.Type.Value}}.{{end}}{{$f.Name}}() {{Got .}} = %v, want %v", {{if not $f.Named}}tt.{{end}}name)
+                {{template "equal" $f}}(t, tt.{{Want .}}, {{Got .}}, "%q. {{with $f.Receiver}}{{$f.Receiver.Type.Value}}.{{end}}{{$f.Name}}() {{Got .}} = %v, want %v", {{if not $f.Named}}tt.{{end}}name, {{Got .}}, tt.{{Want .}})
 			{{- end}}
 		{{- if .Subtests }} }) {{- end -}}
 	}
